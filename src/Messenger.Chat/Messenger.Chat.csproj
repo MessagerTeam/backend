@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Messenger.Contracts\Messenger.Contracts.csproj" />
+    <ProjectReference Include="..\Messenger.Messaging\Messenger.Messaging.csproj" />
+    <ProjectReference Include="..\Messenger.Shared\Messenger.Shared.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
