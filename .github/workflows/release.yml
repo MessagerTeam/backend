@@ -139,6 +139,11 @@ jobs:
             exit 1
           fi
 
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::Release version is empty"
+            exit 1
+          fi
+
           PAYLOAD="$(jq -n \
             --arg version "$VERSION" \
             '{
@@ -148,10 +153,73 @@ jobs:
               }
             }')"
 
-          curl --fail-with-body --silent --show-error \
+          TEMP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$TEMP_DIR"' EXIT
+
+          HEADERS="${TEMP_DIR}/headers.txt"
+          BODY="${TEMP_DIR}/body.json"
+
+          echo "Target repository: MessagerTeam/infra"
+          echo "Event type: backend_release"
+          echo "Release version: $VERSION"
+
+          if HTTP_CODE="$(curl --silent --show-error \
+            --connect-timeout 15 \
+            --max-time 60 \
+            --dump-header "$HEADERS" \
+            --output "$BODY" \
+            --write-out '%{http_code}' \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/MessagerTeam/infra/dispatches" \
-            --data "$PAYLOAD"
+            --data "$PAYLOAD")"; then
+            echo "Dispatch HTTP status: $HTTP_CODE"
+          else
+            CURL_EXIT_CODE=$?
+            echo "::error::Network or TLS error. curl exit code: $CURL_EXIT_CODE"
+            exit "$CURL_EXIT_CODE"
+          fi
+
+          echo "::group::GitHub API diagnostic response headers"
+          grep -Ei \
+            '^(HTTP/|x-accepted-github-permissions:|x-github-request-id:|x-github-sso:|x-ratelimit-remaining:|x-ratelimit-reset:|retry-after:)' \
+            "$HEADERS" || true
+          echo "::endgroup::"
+
+          if [[ -s "$BODY" ]]; then
+            echo "::group::GitHub API response body"
+            if jq . "$BODY" 2>/dev/null; then
+              :
+            else
+              cat "$BODY"
+            fi
+            echo "::endgroup::"
+          fi
+
+          case "$HTTP_CODE" in
+            204)
+              echo "Repository dispatch accepted by GitHub."
+              ;;
+            401)
+              echo "::error::Authentication failed. Check whether INFRA_DISPATCH_TOKEN is valid or expired."
+              exit 1
+              ;;
+            403)
+              echo "::error::Access denied. Check Contents: Read and write on MessagerTeam/infra, organization approval, and the token stored in INFRA_DISPATCH_TOKEN."
+              exit 1
+              ;;
+            404)
+              echo "::error::Repository or endpoint not found, or the token cannot access MessagerTeam/infra."
+              exit 1
+              ;;
+            422)
+              echo "::error::GitHub rejected the request payload. See the API response above."
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected GitHub API response: HTTP $HTTP_CODE"
+              exit 1
+              ;;
+          esac
