@@ -126,6 +126,16 @@ docker compose down -v
 - non-root `app`, порт `8080`, `curl` для healthcheck;
 - платформа: `linux/amd64`.
 
+## Контракты API
+
+Swagger UI в dev:
+
+- `http://localhost:5001/swagger` — User Service;
+- `http://localhost:5002/swagger` — Chat Service, только для локальной отладки.
+
+Сейчас контроллеры возвращают `501 Not Implemented`: это контракт для
+параллельной работы с фронтом, бизнес-логика появится на следующих этапах.
+
 ## Релиз и деплой
 
 Релиз создаётся по git-тегу:
