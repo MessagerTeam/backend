@@ -8,6 +8,7 @@ builder.Services.AddMessengerJwt(builder.Configuration);
 builder.Services.AddMessengerHealthChecks();
 builder.Services.AddControllers();
 builder.Services.AddMessengerSwagger(
+    builder.Configuration,
     title: "Messenger Chat API",
     description: "Чаты, сообщения и история.",
     serviceXmlFile: "Messenger.Chat.xml");

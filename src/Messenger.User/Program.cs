@@ -8,6 +8,7 @@ builder.Services.AddMessengerJwt(builder.Configuration);
 builder.Services.AddMessengerHealthChecks();
 builder.Services.AddControllers();
 builder.Services.AddMessengerSwagger(
+    builder.Configuration,
     title: "Messenger User API",
     description: "Регистрация, вход, профиль и поиск пользователей.",
     serviceXmlFile: "Messenger.User.xml");

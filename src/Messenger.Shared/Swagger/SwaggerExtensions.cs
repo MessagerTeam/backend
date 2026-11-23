@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
@@ -12,10 +13,13 @@ public static class SwaggerExtensions
     /// <summary>Подключает Swagger и общие настройки JWT/XML-комментариев.</summary>
     public static IServiceCollection AddMessengerSwagger(
         this IServiceCollection services,
+        IConfiguration configuration,
         string title,
         string description,
         string serviceXmlFile)
     {
+        var serverUrl = configuration["Swagger:ServerUrl"];
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -29,11 +33,14 @@ public static class SwaggerExtensions
             options.SupportNonNullableReferenceTypes();
             options.NonNullableReferenceTypesAsRequired();
 
-            options.AddServer(new()
+            if (!string.IsNullOrWhiteSpace(serverUrl))
             {
-                Url = "http://localhost:5000",
-                Description = "Gateway (локальный запуск)",
-            });
+                options.AddServer(new()
+                {
+                    Url = serverUrl,
+                    Description = "Gateway",
+                });
+            }
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
