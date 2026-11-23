@@ -99,6 +99,7 @@ jobs:
           cp deploy/docker-compose.yml "${BUNDLE}/docker-compose.yml"
           cp deploy/init-db.sh "${BUNDLE}/init-db.sh"
           cp deploy/README.md "${BUNDLE}/README.md"
+          cp deploy/Makefile "${BUNDLE}/Makefile"
           cp deploy/.env.example "${BUNDLE}/.env.example"
 
           # Подставляем версию релиза в шаблон .env, чтобы infra не выбирала тег вручную.
