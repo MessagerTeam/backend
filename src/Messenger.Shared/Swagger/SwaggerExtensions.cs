@@ -83,6 +83,7 @@ public static class SwaggerExtensions
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", $"{title} v1");
+            options.ConfigObject.AdditionalItems["withCredentials"] = true;
         });
 
         return app;
