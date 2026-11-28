@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Messenger.Shared.Errors;
 
 /// <summary>Единый формат ошибки API.</summary>
@@ -9,4 +11,5 @@ public sealed record ApiError(
     int Status,
     string Detail,
     string CorrelationId,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyDictionary<string, string[]>? Errors = null);

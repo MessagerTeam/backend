@@ -59,6 +59,7 @@ services:
     image: messenger/user-service:local
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Jwt__Secret: ${JWT_SECRET:?JWT_SECRET is required}
       Jwt__Issuer: ${JWT_ISSUER:-messenger}
       Jwt__Audience: ${JWT_AUDIENCE:-messenger-api}
@@ -84,6 +85,7 @@ services:
     image: messenger/chat-service:local
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Jwt__Secret: ${JWT_SECRET:?JWT_SECRET is required}
       Jwt__Issuer: ${JWT_ISSUER:-messenger}
       Jwt__Audience: ${JWT_AUDIENCE:-messenger-api}
@@ -109,6 +111,7 @@ services:
     image: messenger/realtime-service:local
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Jwt__Secret: ${JWT_SECRET:?JWT_SECRET is required}
       Jwt__Issuer: ${JWT_ISSUER:-messenger}
       Jwt__Audience: ${JWT_AUDIENCE:-messenger-api}
@@ -129,11 +132,14 @@ services:
     image: messenger/gateway:local
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Jwt__Secret: ${JWT_SECRET:?JWT_SECRET is required}
       Jwt__Issuer: ${JWT_ISSUER:-messenger}
       Jwt__Audience: ${JWT_AUDIENCE:-messenger-api}
       Cors__AllowedOrigins__0: http://localhost:8081
       Cors__AllowedOrigins__1: http://localhost:19006
+      Cors__AllowedOrigins__2: http://localhost:${USER_SERVICE_PORT:-5001}
+      Cors__AllowedOrigins__3: http://localhost:${CHAT_SERVICE_PORT:-5002}
     depends_on:
       user-service:
         condition: service_healthy

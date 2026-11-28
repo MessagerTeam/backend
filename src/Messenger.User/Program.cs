@@ -1,26 +1,20 @@
 using Messenger.Shared.Auth;
 using Messenger.Shared.Health;
-using Messenger.Shared.Swagger;
+using Messenger.User.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMessengerJwt(builder.Configuration);
-builder.Services.AddMessengerHealthChecks();
-builder.Services.AddControllers();
-builder.Services.AddMessengerSwagger(
-    builder.Configuration,
-    title: "Messenger User API",
-    description: "Регистрация, вход, профиль и поиск пользователей.",
-    serviceXmlFile: "Messenger.User.xml");
+builder.Services
+    .AddMessengerJwt(builder.Configuration)
+    .AddMessengerHealthChecks()
+    .AddUserPersistence(builder.Configuration)
+    .AddUserAuth()
+    .AddUserApi(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseMessengerSwagger("Messenger User API");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapMessengerHealthChecks();
-app.MapControllers();
+app.MigrateUserDatabase();
+app.UseUserApi();
+app.MapUserEndpoints();
 
 app.Run();

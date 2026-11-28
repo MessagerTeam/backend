@@ -113,8 +113,8 @@ docker compose down -v
 - Connection strings передаются сервисам через env:
   - `ConnectionStrings__UsersDb` — только для User;
   - `ConnectionStrings__ChatDb` — только для Chat.
-- Таблицы в этих базах появятся позже через EF Core миграции.
-  Скрипт создаёт только базы и роли.
+- Таблицы создаются EF Core миграциями при старте сервиса
+  (`Database.Migrate()`); скрипт создаёт только базы и роли.
 - Пароли не хранятся в репозитории; в `.env.example` только placeholder’ы.
 
 ## Docker-образы
