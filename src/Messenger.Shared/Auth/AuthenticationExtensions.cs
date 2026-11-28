@@ -1,5 +1,8 @@
 using System.Text;
+using Messenger.Shared.Correlation;
+using Messenger.Shared.Errors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -66,6 +69,23 @@ public static class AuthenticationExtensions
                         }
 
                         return Task.CompletedTask;
+                    },
+
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+
+                        var correlationId =
+                            context.HttpContext.Items[CorrelationIdMiddleware.ItemKey] as string
+                            ?? context.HttpContext.TraceIdentifier;
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.Headers["WWW-Authenticate"] = "Bearer";
+
+                        await context.Response.WriteAsJsonAsync(new ApiError(
+                            StatusCodes.Status401Unauthorized,
+                            "Требуется авторизация",
+                            correlationId));
                     },
                 };
             });

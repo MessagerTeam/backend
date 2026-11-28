@@ -17,7 +17,11 @@ public sealed class RefreshTokenCookieService(IWebHostEnvironment environment)
 
     public void Delete(HttpResponse response)
     {
-        response.Cookies.Delete(AuthConstants.RefreshCookieName, CreateOptions());
+        response.OnStarting(() =>
+        {
+            response.Cookies.Delete(AuthConstants.RefreshCookieName, CreateOptions());
+            return Task.CompletedTask;
+        });
     }
 
     private CookieOptions CreateOptions() => new()
